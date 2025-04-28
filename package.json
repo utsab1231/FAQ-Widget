@@ -1,8 +1,9 @@
 {
   "name": "faq-widget",
-  "private": true,
-  "version": "0.0.0",
+  "private": false,
+  "version": "1.0.1",
   "type": "module",
+  "main": "dist/faq-widget.umd.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -31,5 +32,13 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
     "vite": "^6.3.1"
-  }
+  },
+  "keywords": [
+    "react",
+    "widget",
+    "faq"
+  ],
+  "author": "Utsab Adhikari",
+  "license": "MIT",
+  "description": "A simple FAQ widget built with React and Tailwind CSS."
 }
