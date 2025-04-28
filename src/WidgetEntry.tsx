@@ -1,41 +1,27 @@
 import ReactDOM from "react-dom/client";
-import FAQWidget from "./components/FAQWidget";
-import faqs, { categories } from "./constants/FAQs";
-import "./index.css"; // Import your CSS file
+import widgetRegistry from "./widgetRegistry";
+import "./index.css";
+
+function getWidgetTypeFromClassList(classList: DOMTokenList): string | undefined {
+  return Object.keys(widgetRegistry).find((className) => classList.contains(className));
+}
 
 function mountWidget(el: HTMLElement) {
-  const faqsAttribute = el.getAttribute("data-faqs");
-  const categoriesAttribute = el.getAttribute("data-categories");
-  const titleAttribute = el.getAttribute("data-title");
-  const themeAttribute = el.getAttribute("data-theme");
-  const defaultCategoryAttribute = el.getAttribute("data-default-category");
+  const widgetType = getWidgetTypeFromClassList(el.classList);
+  if (!widgetType) return;
 
-  const faqlist = faqsAttribute ? JSON.parse(faqsAttribute) : faqs;
-  const categoriesList = categoriesAttribute
-    ? JSON.parse(categoriesAttribute)
-    : categories;
-  const title = titleAttribute || "FAQs";
-  const theme =
-    themeAttribute === "light" || themeAttribute === "dark"
-      ? themeAttribute
-      : "light";
-  const defaultCategory = defaultCategoryAttribute || "General";
-  ReactDOM.createRoot(el).render(
-    <FAQWidget
-      faqs={faqlist}
-      categories={categoriesList}
-      theme={theme}
-      title={title}
-      defaultCategory={defaultCategory}
-    />
-  );
+  const { component: Component, parseAttributes } = widgetRegistry[widgetType];
+  const props = parseAttributes ? parseAttributes(el) : {};
+
+  ReactDOM.createRoot(el).render(<Component {...props} />);
+  el.setAttribute("data-mounted", "true");
 }
 
 function mountAllWidgets() {
-  document.querySelectorAll(".faq-widget").forEach((el) => {
+  const selector = Object.keys(widgetRegistry).map((c) => `.${c}`).join(",");
+  document.querySelectorAll(selector).forEach((el) => {
     if (!el.hasAttribute("data-mounted")) {
       mountWidget(el as HTMLElement);
-      el.setAttribute("data-mounted", "true");
     }
   });
 }
@@ -43,32 +29,25 @@ function mountAllWidgets() {
 function observeDOM() {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
-      if (mutation.addedNodes.length) {
-        mutation.addedNodes.forEach((node) => {
-          if (node instanceof HTMLElement) {
-            if (
-              node.classList.contains("faq-widget") &&
-              !node.hasAttribute("data-mounted")
-            ) {
-              mountWidget(node);
-              node.setAttribute("data-mounted", "true");
-            }
-            node.querySelectorAll(".faq-widget").forEach((el) => {
-              if (!el.hasAttribute("data-mounted")) {
-                mountWidget(el as HTMLElement);
-                el.setAttribute("data-mounted", "true");
-              }
-            });
+      mutation.addedNodes.forEach((node) => {
+        if (node instanceof HTMLElement) {
+          const widgetType = getWidgetTypeFromClassList(node.classList);
+          if (widgetType && !node.hasAttribute("data-mounted")) {
+            mountWidget(node);
           }
-        });
-      }
+          node.querySelectorAll(Object.keys(widgetRegistry).map((c) => `.${c}`).join(",")).forEach((el) => {
+            if (!el.hasAttribute("data-mounted")) {
+              mountWidget(el as HTMLElement);
+            }
+          });
+        }
+      });
     });
   });
 
   observer.observe(document.body, { childList: true, subtree: true });
 }
 
-// --- auto run widget mount ---
 function run() {
   if (document.readyState !== "loading") {
     mountAllWidgets();
@@ -82,5 +61,4 @@ function run() {
 }
 run();
 
-// --- expose manual methods ---
 export { mountAllWidgets, mountWidget, observeDOM };
