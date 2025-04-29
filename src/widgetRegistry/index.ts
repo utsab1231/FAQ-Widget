@@ -1,5 +1,6 @@
 import AnotherWidget from "../components/AnotheWidget";
-import FAQWidget from "../components/FAQWidget";
+import Calendar from "../components/Calendar/Calendar";
+import FAQWidget from "../components/FAQ/FAQWidget";
 
 import faqs, { categories } from "../constants/FAQs";
 
@@ -28,6 +29,18 @@ const widgetRegistry: Record<string, WidgetRegistration> = {
     component: AnotherWidget,
     parseAttributes: (el) => ({
       title: el.getAttribute("data-title") || "This is title",
+    }),
+  },
+
+  // Holiday widget
+  "holiday-widget": {
+    component: Calendar,
+    parseAttributes: (el) => ({
+      year: el.getAttribute("data-year")
+        ? parseInt(el.getAttribute("data-year")!)
+        : new Date().getFullYear(),
+      country: el.getAttribute("data-country") || "NP",
+      apiKey: el.getAttribute("data-api-key") || "1234567890",
     }),
   },
 };

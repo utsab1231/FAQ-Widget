@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FAQItemProps } from "../types/components.types";
+import { FAQItemProps } from "../../types/components.types";
 
 const FAQItem: React.FC<FAQItemProps> = ({ question, answer, id }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);

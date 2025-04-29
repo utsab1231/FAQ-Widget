@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FAQ, FAQWidgetProps } from "../types/components.types";
+import { FAQ, FAQWidgetProps } from "../../types/components.types";
 import FAQItem from "./FAQItem";
 
 const FAQWidget: React.FC<FAQWidgetProps> = ({
